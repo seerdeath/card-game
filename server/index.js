@@ -7,12 +7,22 @@ import {
   drawCard,
   useItem
 } from "./rooms.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer);
 
-app.use(express.static("client"));
+// 🔥 ВАЖНО: правильно отдаём client
+app.use(express.static(path.join(__dirname, "../client")));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/index.html"));
+});
 
 io.on("connection", socket => {
 
@@ -42,8 +52,4 @@ io.on("connection", socket => {
 });
 
 const PORT = process.env.PORT || 3000;
-
-httpServer.listen(PORT, () => {
-  console.log("Server running on port", PORT);
-});
-});
+httpServer.listen(PORT, () =>
