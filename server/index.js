@@ -1,32 +1,46 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { createRoom, joinRoom, drawCard } from "./rooms.js";
+import {
+  createRoom,
+  joinRoom,
+  drawCard,
+  useItem
+} from "./rooms.js";
 
 const app = express();
-const server = createServer(app);
-const io = new Server(server);
+const httpServer = createServer(app);
+const io = new Server(httpServer);
 
 app.use(express.static("client"));
 
-io.on("connection", (socket) => {
-  socket.on("create_room", (name) => {
-    const room = createRoom(socket.id, name);
+io.on("connection", socket => {
+
+  socket.on("create_room", name => {
+    const room = createRoom(socket, name);
     socket.join(room.id);
     socket.emit("room_joined", room);
   });
 
   socket.on("join_room", ({ roomId, name }) => {
-    const room = joinRoom(roomId, socket.id, name);
-    socket.join(room.id);
-    io.to(room.id).emit("room_update", room);
+    const room = joinRoom(roomId, socket, name);
+    if (room) {
+      socket.join(roomId);
+      io.to(roomId).emit("update", room);
+    }
   });
 
-  socket.on("draw_card", (roomId) => {
+  socket.on("draw_card", roomId => {
     const room = drawCard(roomId, socket.id);
-    io.to(room.id).emit("room_update", room);
+    io.to(roomId).emit("update", room);
+  });
+
+  socket.on("use_item", ({ roomId, item }) => {
+    const room = useItem(roomId, socket.id, item);
+    io.to(roomId).emit("update", room);
   });
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT);
+httpServer.listen(3000, () => {
+  console.log("Server running on port 3000");
+});
