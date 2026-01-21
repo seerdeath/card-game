@@ -6,8 +6,15 @@
 </head>
 <body>
   <h1>Карточная игра</h1>
-  <input id="name" placeholder="Имя">
-  <button onclick="createRoom()">Создать комнату</button>
+
+  <input id="name" placeholder="Имя"><br><br>
+
+  <button onclick="createRoom()">Создать комнату</button><br><br>
+
+  <input id="roomCode" placeholder="Код комнаты">
+  <button onclick="joinRoom()">Войти</button>
+
+  <hr>
   <div id="game"></div>
 
   <script src="/socket.io/socket.io.js"></script>
